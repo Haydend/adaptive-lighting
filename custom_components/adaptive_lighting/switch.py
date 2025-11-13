@@ -1298,7 +1298,7 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             #     )
             #     return
 
-            _LOGGER.debug(
+            _LOGGER.warning(
                 "%s: Scheduling 'light.turn_on' with the following 'service_data': %s"
                 " with context.id='%s'",
                 self._name,
@@ -1307,10 +1307,17 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             )
             light = service_data[ATTR_ENTITY_ID]
             self.manager.last_service_data[light] = service_data
+            # await self.hass.services.async_call(
+            #     LIGHT_DOMAIN,
+            #     SERVICE_TURN_ON,
+            #     service_data,
+            #     context=data.context,
+            # )
+
             await self.hass.services.async_call(
-                LIGHT_DOMAIN,
-                SERVICE_TURN_ON,
-                service_data,
+                "mqtt",
+                "publish",
+                {"topic": "zigbee2mqtt/Hayden Office Lamp/set", "payload": "{\"state\":null,\"brightness\":254,\"color_temp\":200}"},
                 context=data.context,
             )
 
