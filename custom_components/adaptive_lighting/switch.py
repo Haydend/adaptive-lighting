@@ -1326,7 +1326,7 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             await self.hass.services.async_call(
                 "mqtt",
                 "publish",
-                {"topic": "zigbee2mqtt/Hayden Office Lamp/set", "payload": "{\"state\":null,\"brightness\":" + brightness + ",\"color_temp\":"+ colour_temp_mired +"}"},
+                {"topic": "zigbee2mqtt/" + entity_state["friendly_name"] + "/set", "payload": "{\"state\":null,\"brightness\":" + brightness + ",\"color_temp\":"+ colour_temp_mired +"}"},
                 context=data.context,
             )
 
