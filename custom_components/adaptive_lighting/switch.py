@@ -1283,19 +1283,20 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
                 # All service datas processed
                 break
 
-            if (
-                not data.force
-                and not is_on(self.hass, data.entity_id)
-                # if proactively adapting, we are sure that it came from a `light.turn_on`
-                and not self.manager.is_proactively_adapting(data.context.id)
-            ):
-                # Do a last-minute check if the entity is still on.
-                _LOGGER.debug(
-                    "%s: Skipping adaptation of %s because it is now off",
-                    self._name,
-                    data.entity_id,
-                )
-                return
+            # Adapt light even if it is off
+            # if (
+            #     not data.force
+            #     and not is_on(self.hass, data.entity_id)
+            #     # if proactively adapting, we are sure that it came from a `light.turn_on`
+            #     and not self.manager.is_proactively_adapting(data.context.id)
+            # ):
+            #     # Do a last-minute check if the entity is still on.
+            #     _LOGGER.debug(
+            #         "%s: Skipping adaptation of %s because it is now off",
+            #         self._name,
+            #         data.entity_id,
+            #     )
+            #     return
 
             _LOGGER.debug(
                 "%s: Scheduling 'light.turn_on' with the following 'service_data': %s"
