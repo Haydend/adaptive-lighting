@@ -1318,10 +1318,6 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             brightness = str(service_data["brightness"])
 
             entity_state = self.hass.states.get(service_data["entity_id"]).attributes
-            _LOGGER.warning(
-                "entityState: %s",
-                entity_state
-            )
 
             await self.hass.services.async_call(
                 "mqtt",
