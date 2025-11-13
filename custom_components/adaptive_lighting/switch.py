@@ -1314,10 +1314,19 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             #     context=data.context,
             # )
 
+            colour_temp_mired = str( round(1000000 / service_data["color_temp_kelvin"]))
+            brightness = str(service_data["brightness"])
+
+            entity_state = self.hass[data.entity_id]
+            _LOGGER.warning(
+                "entityState: %s",
+                entity_state
+            )
+
             await self.hass.services.async_call(
                 "mqtt",
                 "publish",
-                {"topic": "zigbee2mqtt/Hayden Office Lamp/set", "payload": "{\"state\":null,\"brightness\":" + str(service_data["brightness"]) + ",\"color_temp\":"+ str( 1000000 / service_data["color_temp_kelvin"]) +"}"},
+                {"topic": "zigbee2mqtt/Hayden Office Lamp/set", "payload": "{\"state\":null,\"brightness\":" + brightness + ",\"color_temp\":"+ colour_temp_mired +"}"},
                 context=data.context,
             )
 
