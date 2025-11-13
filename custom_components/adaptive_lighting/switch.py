@@ -253,7 +253,7 @@ class NoSwitchFoundError(ValueError):
     """No switches found for lights."""
 
 
-def _switch_with_lights(
+def _switch_wityh_lights(
     hass: HomeAssistant,
     lights: list[str],
     expand_light_groups: bool = True,
@@ -1378,7 +1378,8 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
         if lights is None:
             lights = self.lights
 
-        on_lights = [light for light in lights if is_on(self.hass, light)]
+        # Adapt all lights, even ones that are off! 
+        on_lights = lights # [light for light in lights if is_on(self.hass, light)]
 
         if force:
             filtered_lights = on_lights
