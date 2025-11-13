@@ -1317,7 +1317,7 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             colour_temp_mired = str( round(1000000 / service_data["color_temp_kelvin"]))
             brightness = str(service_data["brightness"])
 
-            entity_state = self.hass[data.entity_id]
+            entity_state = self.hass.states.get[data.entity_id].attributes
             _LOGGER.warning(
                 "entityState: %s",
                 entity_state
