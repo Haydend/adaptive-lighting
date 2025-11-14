@@ -4,11 +4,9 @@ import zoneinfo
 import pytest
 from astral import LocationInfo
 from astral.location import Location
-from homeassistant.components.adaptive_lighting.color_and_brightness import (
-    SUN_EVENT_NOON,
-    SUN_EVENT_SUNRISE,
-    SunEvents,
-)
+
+from custom_components.adaptive_lighting.color_and_brightness import SunEvents, SUN_EVENT_SUNRISE, SUN_EVENT_NOON, \
+    SunLightSettings
 
 # Create a mock astral_location object
 location = Location(LocationInfo())
@@ -208,3 +206,68 @@ def test_closest_event(tzinfo_and_location):
     event_name, ts = sun_events.closest_event(sunrise)
     assert event_name == SUN_EVENT_SUNRISE
     assert ts == location.sunrise(sunrise.date()).timestamp()
+
+def test_sun_position_pct_linear():
+    tzinfo = zoneinfo.ZoneInfo("UTC")
+    location = Location(
+        LocationInfo(
+            name="name",
+            region="region",
+            timezone="UTC",
+            latitude=60,
+            longitude=50,
+        ),
+    )
+
+    sun_light_settings = SunLightSettings(
+        name="test",
+        sunrise_time= dt.time(7, 0, 0),
+        sunset_time= dt.time(18, 0, 0),
+        astral_location = location,
+        adapt_until_sleep = False,
+        max_brightness= None,
+        max_color_temp= None,
+        min_brightness= None,
+        min_color_temp= None,
+        sleep_brightness= None,
+        sleep_rgb_or_color_temp= "color_temp",
+        sleep_color_temp=None,
+        sleep_rgb_color =None,
+        min_sunrise_time=None,
+        max_sunrise_time=None,
+        min_sunset_time=None,
+        max_sunset_time=None,
+        brightness_mode_time_dark=dt.timedelta(hours=1),
+        brightness_mode_time_light=dt.timedelta(hours=1),
+        brightness_mode = "default",
+        sunrise_offset=dt.timedelta(0),
+        sunset_offset=dt.timedelta(0),
+        timezone=tzinfo,
+    )
+
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 0, 0)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 2, 0)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 4, 0)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 5, 0)) == 0
+
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 6, 0)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 6, 30)) == 0.25
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 7, 0)) == 0.5
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 7, 30)) == 0.75
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 8, 00)) == 1
+
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 9, 00)) == 1
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 11, 00)) == 1
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 13, 00)) == 1
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 15, 00)) == 1
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 16, 00)) == 1
+
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 17, 00)) == 1
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 17, 30)) == 0.75
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 18, 00)) == 0.5
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 18, 30)) == 0.25
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 19, 00)) == 0
+
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 20, 00)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 22, 00)) == 0
+    assert sun_light_settings._sun_position_pct_linear(dt.datetime(2022, 1, 1, 23, 59)) == 0

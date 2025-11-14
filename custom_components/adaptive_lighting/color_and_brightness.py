@@ -296,6 +296,30 @@ class SunLightSettings:
             )
         return clamp(brightness, self.min_brightness, self.max_brightness)
 
+    def _sun_position_pct_linear(self, dt: datetime.datetime) -> float:
+        event, ts_event = self.sun.closest_event(dt)
+        # at ts_event - dt_start, brightness == start_brightness
+        # at ts_event + dt_end, brightness == end_brightness
+        dark = self.brightness_mode_time_dark.total_seconds()
+        light = self.brightness_mode_time_light.total_seconds()
+        if event == SUN_EVENT_SUNRISE:
+            sun_position = lerp(
+                dt.timestamp() - ts_event,
+                x1=-dark,
+                x2=+light,
+                y1=0,
+                y2=1,
+            )
+        elif event == SUN_EVENT_SUNSET:
+            sun_position = lerp(
+                dt.timestamp() - ts_event,
+                x1=-light,
+                x2=+dark,
+                y1=1,
+                y2=0,
+            )
+        return clamp(sun_position, 0, 1)
+
     def brightness_pct(self, dt: datetime.datetime, is_sleep: bool) -> float:
         """Calculate the brightness in %."""
         if is_sleep:
@@ -330,7 +354,11 @@ class SunLightSettings:
         is_sleep: bool,
     ) -> dict[str, Any]:
         """Calculate the brightness and color."""
-        sun_position = self.sun.sun_position(dt)
+
+        # Use linear logic to compress sunrise and sunset times to length set as dark_time and light_time
+        sun_position = self._sun_position_pct_linear(dt)
+        # sun_position = self.sun.sun_position(dt)
+
         rgb_color: tuple[float, float, float]
         # Variable `force_rgb_color` is needed for RGB color after sunset (if enabled)
         force_rgb_color = False
