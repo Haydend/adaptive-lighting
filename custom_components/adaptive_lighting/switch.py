@@ -253,7 +253,7 @@ class NoSwitchFoundError(ValueError):
     """No switches found for lights."""
 
 
-def _switch_wityh_lights(
+def _switch_with_lights(
     hass: HomeAssistant,
     lights: list[str],
     expand_light_groups: bool = True,
