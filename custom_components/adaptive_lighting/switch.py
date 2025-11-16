@@ -159,7 +159,7 @@ from .helpers import (
     color_difference_redmean,
     int_to_base36,
     remove_vowels,
-    short_hash,
+    short_hash, build_mqtt_message,
 )
 
 if TYPE_CHECKING:
@@ -1314,15 +1314,11 @@ class AdaptiveSwitch(SwitchEntity, RestoreEntity):
             #     context=data.context,
             # )
 
-            colour_temp_mired = str( round(1000000 / service_data["color_temp_kelvin"]))
-            brightness = str(service_data["brightness"])
-
             entity_state = self.hass.states.get(service_data["entity_id"]).attributes
-
             await self.hass.services.async_call(
                 "mqtt",
                 "publish",
-                {"topic": "zigbee2mqtt/" + entity_state["friendly_name"] + "/set", "payload": "{\"state\":null,\"brightness\":" + brightness + ",\"color_temp\":"+ colour_temp_mired +"}"},
+                {"topic": "zigbee2mqtt/" + entity_state["friendly_name"] + "/set", "payload": build_mqtt_message(service_data)},
                 context=data.context,
             )
 

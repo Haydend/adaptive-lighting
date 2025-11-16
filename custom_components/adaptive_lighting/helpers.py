@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import math
+from typing import Any
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
@@ -83,3 +84,17 @@ def color_difference_redmean(
     green_term = 4 * delta_g**2
     blue_term = (2 + (255 - r_hat) / 256) * delta_b**2
     return math.sqrt(red_term + green_term + blue_term)
+
+def build_mqtt_message(service_data:dict[str, Any]) -> str:
+    msg = "{"
+
+    if "color_temp_kelvin" in service_data:
+        color_temp_kelvin = service_data["color_temp_kelvin"]
+        colour_temp_mired = str(round(1000000 / color_temp_kelvin))
+        msg += "\"color_temp\":" + colour_temp_mired + ","
+
+    if "brightness" in service_data:
+        msg += "\"brightness\":" + str(service_data["brightness"]) + ","
+
+    msg += "\"state\":null}"
+    return msg
